@@ -38,7 +38,8 @@ public class AlmacenImpl extends UnicastRemoteObject implements Almacen {
 				objetosCompartidos.add(obj);
 			else {
 				o.setObjeto(obj.getObjeto());
-				o.incVersion();
+				o.setVersion(obj.getCabecera().getVersion());
+
 			}
 		}
 
@@ -47,7 +48,7 @@ public class AlmacenImpl extends UnicastRemoteObject implements Almacen {
 	private ObjetoCompartido get(String nombre) {
 
 		for (ObjetoCompartido o : objetosCompartidos) {
-			if (o.getCabecera().getNombre() == nombre)
+			if (o.getCabecera().getNombre().equals(nombre))
 				return o;
 		}
 		return null;

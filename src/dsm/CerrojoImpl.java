@@ -1,34 +1,39 @@
 package dsm;
 
-import java.rmi.*;
-import java.rmi.server.*;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 
 class CerrojoImpl extends UnicastRemoteObject implements Cerrojo {
 
 	private static final long serialVersionUID = 1L;
-	int lectores;
-	int escritores;
+	private int lectores;
+	private int escritores;
 
 	CerrojoImpl() throws RemoteException {
 	}
 
 	public synchronized void adquirir(boolean exc) throws RemoteException {
-		try {
-			if (escritores > 0)
-				wait();
-			if (exc) {
-				if (lectores > 0) {
-					wait();
-				}
-				escritores++;
-			} else
-				lectores++;
-		} catch (InterruptedException e) {
-			if (exc) {
-				escritores++;
-			} else
-				lectores++;
 
+		try {
+			while (true) {
+				if (exc) {
+					if (lectores > 0 || escritores > 0) {
+						wait();
+					} else {
+						escritores++;
+						return;
+					}
+
+				} else if (escritores > 0) {
+					wait();
+				} else {
+					lectores++;
+					return;
+				}
+			}
+		} catch (InterruptedException e) {
+			// adquirir(exc);
+			e.printStackTrace();
 		}
 
 	}
@@ -41,17 +46,14 @@ class CerrojoImpl extends UnicastRemoteObject implements Cerrojo {
 		if (lectores > 0) {
 			lectores--;
 			if (lectores == 0) {
-				notify();
-			}
-		}
-		if (escritores > 0) {
-			escritores--;
-			if (escritores == 0)
 				notifyAll();
-			else
-				throw new NullPointerException();
+				return true;
+			}
+		} else {
+			escritores--;
+			notifyAll();
+			return true;
 		}
-
-		return true;
+		return false;
 	}
 }
