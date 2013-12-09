@@ -1,14 +1,28 @@
 package dsm;
-import java.rmi.*;
-import java.rmi.server.*;
-import java.util.*;
 
-public class FabricaCerrojosImpl extends UnicastRemoteObject implements FabricaCerrojos {
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
+import java.util.Map;
 
-    public FabricaCerrojosImpl() throws RemoteException {
-    }
-    public synchronized	Cerrojo iniciar(String s) throws RemoteException {
-	return null;
-    }
+public class FabricaCerrojosImpl extends UnicastRemoteObject implements
+		FabricaCerrojos {
+
+	private static final long serialVersionUID = 1L;
+
+	Map<String, Cerrojo> cerrojos = new HashMap<String, Cerrojo>();
+
+	public FabricaCerrojosImpl() throws RemoteException {
+	}
+
+	public synchronized Cerrojo iniciar(String s) throws RemoteException {
+
+		if (cerrojos.containsKey(s))
+			return cerrojos.get(s);
+
+		Cerrojo cer = new CerrojoImpl();
+		cerrojos.put(s, cer);
+
+		return cer;
+	}
 }
-
