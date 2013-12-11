@@ -32,7 +32,6 @@ class CerrojoImpl extends UnicastRemoteObject implements Cerrojo {
 				}
 			}
 		} catch (InterruptedException e) {
-			// adquirir(exc);
 			e.printStackTrace();
 		}
 
@@ -54,6 +53,7 @@ class CerrojoImpl extends UnicastRemoteObject implements Cerrojo {
 			notifyAll();
 			return true;
 		}
-		return false;
+		return true;
+
 	}
 }
