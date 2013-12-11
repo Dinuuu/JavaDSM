@@ -66,13 +66,9 @@ public class DSMCerrojo {
 					o.setObjeto(obj.getObjeto());
 					o.setVersion(obj.getCabecera().getVersion());
 
-				} else
-					System.out.println("No existe");
+				}
 			}
 		}
-
-		else
-			System.out.println("NADA NUEVO");
 
 		return true;
 	}
