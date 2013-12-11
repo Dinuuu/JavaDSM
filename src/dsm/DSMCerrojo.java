@@ -55,17 +55,18 @@ public class DSMCerrojo {
 		this.cer.adquirir(exc);
 
 		List<CabeceraObjetoCompartido> cabeceras = listaCabeceras();
+		if (cabeceras != null) {
+			List<ObjetoCompartido> nuevos = almacen.leerObjetos(cabeceras);
 
-		List<ObjetoCompartido> nuevos = almacen.leerObjetos(cabeceras);
+			if (nuevos != null) {
 
-		if (nuevos != null) {
+				for (ObjetoCompartido obj : nuevos) {
+					ObjetoCompartido o = get(obj.getCabecera().getNombre());
+					if (o != null) {
+						o.setObjeto(obj.getObjeto());
+						o.setVersion(obj.getCabecera().getVersion());
 
-			for (ObjetoCompartido obj : nuevos) {
-				ObjetoCompartido o = get(obj.getCabecera().getNombre());
-				if (o != null) {
-					o.setObjeto(obj.getObjeto());
-					o.setVersion(obj.getCabecera().getVersion());
-
+					}
 				}
 			}
 		}
