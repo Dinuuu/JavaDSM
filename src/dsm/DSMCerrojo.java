@@ -15,9 +15,9 @@ public class DSMCerrojo {
 	String nombre;
 	FabricaCerrojos fabrica;
 	Almacen almacen;
-	Map<String, ObjetoCompartido> objetos = new HashMap<String, ObjetoCompartido>();
+	List<ObjetoCompartido> objetos = new ArrayList<ObjetoCompartido>();
 	Cerrojo cer;
-	boolean lector;
+	boolean exclusivo;
 
 	public DSMCerrojo(String nom) throws RemoteException,
 			MalformedURLException, NotBoundException {
@@ -34,38 +34,63 @@ public class DSMCerrojo {
 	}
 
 	public void asociar(ObjetoCompartido o) {
-		objetos.put(o.getCabecera().getNombre(), o);
+		objetos.add(o);
 	}
 
 	public void desasociar(ObjetoCompartido o) {
 
-		objetos.remove(o.getCabecera().getNombre());
+		for (int i = 0; i < objetos.size(); i++) {
+			ObjetoCompartido obj = objetos.get(i);
+			if (obj.getCabecera().getNombre()
+					.equals(o.getCabecera().getNombre())) {
+				objetos.remove(i);
+				return;
+			}
+		}
 	}
 
 	public boolean adquirir(boolean exc) throws RemoteException {
 
+		this.exclusivo = exc;
 		this.cer.adquirir(exc);
 
 		List<CabeceraObjetoCompartido> cabeceras = listaCabeceras();
 
-		if (cabeceras != null) {
-			List<ObjetoCompartido> nuevos = almacen.leerObjetos(cabeceras);
+		List<ObjetoCompartido> nuevos = almacen.leerObjetos(cabeceras);
 
-			if (nuevos != null)
-				for (ObjetoCompartido o : nuevos) {
-					objetos.remove(o.getCabecera().getNombre());
-					objetos.put(o.getCabecera().getNombre(), o);
-				}
+		if (nuevos != null) {
+
+			for (ObjetoCompartido obj : nuevos) {
+				ObjetoCompartido o = get(obj.getCabecera().getNombre());
+				if (o != null) {
+					o.setObjeto(obj.getObjeto());
+					o.setVersion(obj.getCabecera().getVersion());
+
+				} else
+					System.out.println("No existe");
+			}
 		}
-		lector = !exc;
+
+		else
+			System.out.println("NADA NUEVO");
+
 		return true;
+	}
+
+	private ObjetoCompartido get(String nombre) {
+
+		for (ObjetoCompartido o : objetos) {
+			if (o.getCabecera().getNombre().equals(nombre))
+				return o;
+		}
+		return null;
+
 	}
 
 	private List<CabeceraObjetoCompartido> listaCabeceras() {
 
-		Collection<ObjetoCompartido> objetosComp = objetos.values();
 		List<CabeceraObjetoCompartido> resp = new ArrayList<CabeceraObjetoCompartido>();
-		for (ObjetoCompartido o : objetosComp) {
+		for (ObjetoCompartido o : objetos) {
 			resp.add(o.getCabecera());
 		}
 		if (resp.size() == 0)
@@ -75,19 +100,16 @@ public class DSMCerrojo {
 
 	public boolean liberar() throws RemoteException {
 
-		if (!lector) {
+		if (exclusivo) {
 			List<ObjetoCompartido> obs = new ArrayList<ObjetoCompartido>();
 
-			for (ObjetoCompartido o : objetos.values()) {
+			for (ObjetoCompartido o : objetos) {
+				o.incVersion();
 				obs.add(o);
 			}
 
-			if (obs.size() != 0)
-				almacen.escribirObjetos(obs);
+			almacen.escribirObjetos(obs);
 		}
-		boolean resp = cer.liberar();
-
-		System.out.println(resp);
-		return resp;
+		return cer.liberar();
 	}
 }

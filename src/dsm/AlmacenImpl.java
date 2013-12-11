@@ -6,6 +6,7 @@ import java.util.*;
 
 public class AlmacenImpl extends UnicastRemoteObject implements Almacen {
 
+	private static final long serialVersionUID = 1L;
 	List<ObjetoCompartido> objetosCompartidos = new ArrayList<ObjetoCompartido>();
 
 	public AlmacenImpl() throws RemoteException {
